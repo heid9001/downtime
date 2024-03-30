@@ -10,8 +10,7 @@ import (
 )
 
 type Scheduler struct {
-	app   api.App
-	tasks []api.Task
+	app api.App
 }
 
 func NewScheduler(app api.App) api.Scheduler {
@@ -50,10 +49,6 @@ func (s *Scheduler) Start() {
 			}
 		}
 	}
-}
-
-func (s *Scheduler) Add(task api.Task) {
-	s.tasks = append(s.tasks, task)
 }
 
 func (s *Scheduler) App() api.App {
