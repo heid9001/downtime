@@ -1,93 +1,42 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"sync"
-	"time"
-
-	"heid9/downtime/api/cli"
-	"heid9/downtime/api/parsing"
-	"heid9/downtime/api/storage"
-	implcli "heid9/downtime/cli"
-	implparsing "heid9/downtime/parsing"
-	implstorage "heid9/downtime/storage/inmem"
+	"heid9/downtime/api"
+	"heid9/downtime/cli"
+	"heid9/downtime/parsing"
+	"heid9/downtime/scheduler"
+	"heid9/downtime/storage/inmem"
 )
 
 type App struct {
-	cmd    cli.Command
-	ctx    storage.Context
-	parser parsing.Parser
-	dur    time.Duration
-	urls   []string
+	parser    api.Parser
+	context   api.Context
+	console   api.Console
+	scheduler api.Scheduler
 }
 
-func NewApp() *App {
+func NewApp() api.App {
 	app := &App{
-		cmd:    implcli.NewCommand(),
-		ctx:    implstorage.NewContext(),
-		parser: implparsing.NewParser(),
+		parser:  parsing.NewParser(),
+		console: cli.NewConsole(),
+		context: inmem.NewContext(),
 	}
-	dur, ok := app.cmd.DurationArg()
-	if !ok {
-		log.Fatalln("Укажите параметр -i <секунды>")
-	}
-	app.dur = dur
-	app.urls = app.cmd.Urls()
-	if len(app.urls) == 0 {
-		log.Fatalln("Укажите список разделенный \\n в STDIN. Например: cat links.txt | go run . -i 5")
-	}
+	app.scheduler = scheduler.NewScheduler(app)
 	return app
 }
 
-func (app *App) Start() {
-	for {
-		started := time.Now()
-		app.Process(app.urls)
-		now := time.Now()
-		// при ожидании учитываем уже прошедшее время
-		d := app.dur - now.Sub(started)
-		if d > 0 {
-			time.Sleep(d)
-		}
-	}
+func (a App) Console() api.Console {
+	return a.console
 }
 
-func (app *App) Process(urls []string) {
-	g := &sync.WaitGroup{}
-	ch := make(chan storage.Result)
-	for _, domain := range urls {
-		g.Add(1)
-		go app.HandleRequest(domain, g, ch)
-	}
-	go app.StoreResults(app.ctx, ch)
-	g.Wait()
-	close(ch)
-	fmt.Println("Finished")
-	for _, res := range app.ctx.Results() {
-		fmt.Println(res)
-	}
+func (a App) Context() api.Context {
+	return a.context
 }
 
-func (app *App) StoreResults(
-	ctx storage.Context,
-	ch <-chan storage.Result,
-) {
-	for result := range ch {
-		ctx.Add(result)
-	}
+func (a App) Parser() api.Parser {
+	return a.parser
 }
 
-func (app *App) HandleRequest(
-	domain string,
-	g *sync.WaitGroup,
-	ch chan<- storage.Result,
-) {
-	var state bool
-	reader, err := app.parser.LoadFromUrl(domain)
-	if err == nil {
-		state = app.parser.Match(reader)
-	}
-	ch <- implstorage.NewResult(domain, state)
-	g.Done()
+func (a App) Scheduler() api.Scheduler {
+	return a.scheduler
 }

@@ -1,6 +1,8 @@
-package storage
+package api
 
-import "time"
+import (
+	"time"
+)
 
 // Результат проверки страницы
 type Result interface {

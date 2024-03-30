@@ -3,15 +3,14 @@ package inmem
 
 import (
 	"fmt"
+	"heid9/downtime/api"
 	"time"
-
-	api "heid9/downtime/api/storage"
 )
 
 const (
-	DOWNTIME_MSG = "%s - recovered after %s\n"
-	OK_MSG       = "%s - ok\n"
-	FAIL_MSG     = "%s - fail\n"
+	DOWNTIME_MSG = "%s - recovered after %s"
+	OK_MSG       = "%s - ok"
+	FAIL_MSG     = "%s - fail"
 )
 
 type Result struct {

@@ -2,9 +2,8 @@
 package inmem
 
 import (
+	"heid9/downtime/api"
 	"sync"
-
-	api "heid9/downtime/api/storage"
 )
 
 // Доступ к хранилищу только по указателю => mutex можно хранить по значению

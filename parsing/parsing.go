@@ -3,12 +3,11 @@ package parsing
 import (
 	"bytes"
 	"errors"
+	"heid9/downtime/api"
 	"io"
 	"net/http"
 	"os"
 	"strings"
-
-	api "heid9/downtime/api/parsing"
 
 	"golang.org/x/net/html"
 )

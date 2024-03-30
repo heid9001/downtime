@@ -1,5 +1,5 @@
 // Апи хранилища результатов проверок
-package storage
+package api
 
 // Хранилище результатов
 type Context interface {

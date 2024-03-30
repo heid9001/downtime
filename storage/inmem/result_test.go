@@ -1,10 +1,9 @@
 package inmem
 
 import (
+	"heid9/downtime/api"
 	"testing"
 	"time"
-
-	api "heid9/downtime/api/storage"
 )
 
 type unit struct {
